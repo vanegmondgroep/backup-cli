@@ -1,0 +1,107 @@
+#!/bin/bash
+
+set -e
+
+# shellcheck disable=SC2046
+export $(grep -v '^#' .env | xargs -d '\n')
+
+log() {
+  printf '[%s] %s\n' "$1" "${@:2}"
+}
+
+log_info() {
+  log "$1" "${@:2}" >&2
+}
+
+log_error() {
+  if [[ ! -z $2 ]]; then
+    log "$1" "${@:2}" >&2
+  else
+    log "x" "${@}" >&2
+  fi
+
+  exit 1
+}
+
+service_exists() {
+  if [[ -z $1 ]]; then
+    log_error "No service specified"
+  fi
+
+  BACKUP_PATH_VAR=${1^^}_BACKUP_PATH
+  export BACKUP_PATH=${!BACKUP_PATH_VAR}
+
+  if [[ -z $BACKUP_PATH ]]; then
+    log_error "$1" "Environment [$BACKUP_PATH_VAR] is undefined"
+  fi
+
+  if [[ ! -d "$BACKUP_PATH" ]]; then
+    log_error "$1" "Backup path [$BACKUP_PATH] doesn't exist"
+  fi
+}
+
+restic_cmd() {
+  RESTIC_PASSWORD=$BACKUP_PASSWORD restic -r "$BACKUP_REPOSITORIES_PATH/$1" "${@:2}"
+}
+
+restic_init() {
+  restic_cmd "$1" init --quiet &>/dev/null || true
+}
+
+restic_backup() {
+  restic_cmd "$1" backup --quiet "$BACKUP_PATH"
+}
+
+restic_snapshots() {
+  restic_cmd "$1" snapshots
+}
+
+restic_cleanup() {
+  restic_cmd "$1" forget --quiet --keep-last 5 --keep-daily 31 --keep-monthly 12 --keep-yearly 1
+}
+
+backup() {
+  pre_backup_hook="./hooks/$1_pre_backup_hook"
+  post_backup_hook="./hooks/$1_post_backup_hook"
+
+  if [[ -f "$pre_backup_hook" ]]; then
+    log_info "$1" "Run pre backup hook"
+    # shellcheck disable=SC1090
+    source "$pre_backup_hook"
+  fi
+
+  log_info "$1" "Initialize backup repository"
+  restic_init "$1"
+
+  log_info "$1" "Backup files to repository"
+  restic_backup "$1"
+
+  log_info "$1" "Cleanup old backups"
+  restic_cleanup "$1"
+
+  if [[ -f "$post_backup_hook" ]]; then
+    log_info "$1" "Run post backup hook"
+    # shellcheck disable=SC1090
+    source "$post_backup_hook"
+  fi
+}
+
+snapshots() {
+  restic_snapshots "$1"
+}
+
+case $1 in
+backup)
+  service_exists "$2"
+  log_info "$2" "Start backup"
+  backup "${@:2}"
+  ;;
+snapshots)
+  service_exists "$2"
+  log_info "$2" "Display snapshots"
+  snapshots "${@:2}"
+  ;;
+*)
+  log_error "Command not found"
+  ;;
+esac
