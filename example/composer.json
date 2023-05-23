@@ -1,0 +1,5 @@
+{
+    "require": {
+        "vanegmondgroep/backup-cli": "^1.0"
+    }
+}

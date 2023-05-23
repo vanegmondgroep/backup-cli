@@ -1,0 +1,54 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "0a967319eaa5aaf7b7ab553ce2675ff9",
+    "packages": [
+        {
+            "name": "vanegmondgroep/backup-cli",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vanegmondgroep/backup-cli.git",
+                "reference": "b7c48334e5a83607dea3a67d016ab24e6f7434d1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vanegmondgroep/backup-cli/zipball/b7c48334e5a83607dea3a67d016ab24e6f7434d1",
+                "reference": "b7c48334e5a83607dea3a67d016ab24e6f7434d1",
+                "shasum": ""
+            },
+            "bin": [
+                "bcli"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nick Jansen",
+                    "email": "n.jansen@vanegmond.nl"
+                }
+            ],
+            "description": "An extendable command-line interface for backing up and restoring data using Restic.",
+            "support": {
+                "issues": "https://github.com/vanegmondgroep/backup-cli/issues",
+                "source": "https://github.com/vanegmondgroep/backup-cli/tree/v1.0.0"
+            },
+            "time": "2023-05-23T14:21:36+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
+}
