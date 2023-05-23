@@ -52,6 +52,10 @@ are available:
 | `BACKUP_HOOKS_PATH`        | `./backup/hooks`        |
 | `BACKUP_REPOSITORIES_PATH` | `./backup/repositories` |
 | `<service>_BACKUP_PATH`**  | -                       | 
+| `BACKUP_KEEP_LAST`         | 5                       | 
+| `BACKUP_KEEP_DAILY`        | 31                      | 
+| `BACKUP_KEEP_MONTHLY`      | 12                      | 
+| `BACKUP_KEEP_YEARLY`       | 1                       | 
 
 ** This defines a service path you would like to back up (e.g. `MYSQL_BACKUP_PATH`).
 

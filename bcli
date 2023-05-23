@@ -49,13 +49,6 @@ load_env() {
   BACKUP_LOGS_PATH=$(realpath "${BACKUP_LOGS_PATH:-./backup/logs}")
 }
 
-check_root() {
-  if [ "$EUID" -ne 0 ]; then
-    log_error "Please run the command as root"
-    exit 1
-  fi
-}
-
 service_exists() {
   if [[ -z $1 ]]; then
     log_error "No service specified"
@@ -105,7 +98,7 @@ restic_restore() {
 }
 
 restic_cleanup() {
-  restic_cmd "$1" forget --keep-last 5 --keep-daily 31 --keep-monthly 12 --keep-yearly 1
+  restic_cmd "$1" forget --keep-last ${BACKUP_KEEP_LAST:-5} --keep-daily ${BACKUP_KEEP_DAILY:-31} --keep-monthly ${BACKUP_KEEP_MONTHLY:-12} --keep-yearly ${BACKUP_KEEP_YEARLY:-1}
 }
 
 backup() {
