@@ -89,8 +89,8 @@ To schedule a backup, add the following line to your crontab:
 
 ```crontab
 # Run MySQL backup every day at 01:00
-0 1 * * * cd <project-dir> && /usr/local/bin/bcli backup mysql
+0 1 * * * cd <project-dir> && vendor/bin/bcli backup mysql
 
 # Run Node-RED backup every day at 02:00
-0 2 * * * cd <project-dir> && /usr/local/bin/bcli backup node-red
+0 2 * * * cd <project-dir> && vendor/bin/bcli backup node-red
 ```
