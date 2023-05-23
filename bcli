@@ -2,15 +2,16 @@
 
 set -e
 
-# shellcheck disable=SC2046
-export $(grep -v '^#' .env | xargs -d '\n')
-
 log() {
   printf '[%s] %s\n' "$1" "${@:2}"
 }
 
 log_info() {
-  log "$1" "${@:2}" >&2
+  if [[ ! -z $2 ]]; then
+    log "$1" "${@:2}" >&2
+  else
+    log "⚡" "${@}" >&2
+  fi
 }
 
 log_error() {
@@ -21,6 +22,19 @@ log_error() {
   fi
 
   exit 1
+}
+
+load_env() {
+  if [[ ! -f .env ]]; then
+    log_error "Could not find .env file"
+  fi
+
+  # shellcheck disable=SC2046
+  export $(grep -v '^#' .env | xargs -d '\n')
+
+  BACKUP_PASSWORD=${BACKUP_PASSWORD:-supersecret}
+  BACKUP_HOOKS_PATH=${BACKUP_HOOKS_PATH:-./backup/hooks}
+  BACKUP_REPOSITORIES_PATH=${BACKUP_REPOSITORIES_PATH:-./backup/repositories}
 }
 
 service_exists() {
@@ -61,8 +75,8 @@ restic_cleanup() {
 }
 
 backup() {
-  pre_backup_hook="./hooks/$1_pre_backup_hook"
-  post_backup_hook="./hooks/$1_post_backup_hook"
+  pre_backup_hook="$BACKUP_HOOKS_PATH/$1_pre_backup_hook"
+  post_backup_hook="$BACKUP_HOOKS_PATH/$1_post_backup_hook"
 
   if [[ -f "$pre_backup_hook" ]]; then
     log_info "$1" "Run pre backup hook"
@@ -90,15 +104,18 @@ snapshots() {
   restic_snapshots "$1"
 }
 
+load_env
+
 case $1 in
 backup)
   service_exists "$2"
-  log_info "$2" "Start backup"
+  log_info $2 "Backup service data"
   backup "${@:2}"
+  log_info $2 "Backup completed!"
   ;;
 snapshots)
   service_exists "$2"
-  log_info "$2" "Display snapshots"
+  log_info "$2" "Display service snapshots"
   snapshots "${@:2}"
   ;;
 *)
