@@ -2,5 +2,4 @@
 /.idea
 /.vscode
 /.env
-local
-backup
+/backup
