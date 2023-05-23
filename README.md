@@ -22,6 +22,8 @@ chmod +x ./bcli
 sudo mv ./bcli /usr/local/bin/bcli
 ```
 
+Run the above commands again to update Backup CLI.
+
 ## Commands
 
 ```bash
@@ -72,3 +74,15 @@ Logs are written to `$BACKUP_LOGS_PATH/<service>.log`.
 ## Example
 
 The [example configuration](./example) shows how you can back up / restore a MySQL and Node-RED container.
+
+## Cronjobs
+
+To schedule a backup, add the following line to your crontab:
+
+```crontab
+# Run MySQL backup every day at 01:00
+0 1 * * * cd <project-dir> && /usr/local/bin/bcli backup mysql
+
+# Run Node-RED backup every day at 02:00
+0 2 * * * cd <project-dir> && /usr/local/bin/bcli backup node-red
+```

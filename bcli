@@ -49,8 +49,14 @@ load_env() {
   BACKUP_LOGS_PATH=$(realpath "${BACKUP_LOGS_PATH:-./backup/logs}")
 }
 
-service_exists() {
+check_root() {
+  if [ "$EUID" -ne 0 ]; then
+    log_error "Please run the command as root"
+    exit 1
+  fi
+}
 
+service_exists() {
   if [[ -z $1 ]]; then
     log_error "No service specified"
   fi
