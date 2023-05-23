@@ -1,5 +1,3 @@
-
-
 # Backup CLI
 
 An extendable command-line interface for backing up and restoring data using [Restic](https://restic.net).
@@ -73,4 +71,4 @@ Logs are written to `$BACKUP_LOGS_PATH/<service>.log`.
 
 ## Example
 
-An example configuration can be found [here](./example).
+The [example configuration](./example) shows how you can back up / restore a MySQL and Node-RED container.
