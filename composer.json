@@ -1,0 +1,16 @@
+{
+  "name": "vanegmondgroep/backup-cli",
+  "description": "An extendable command-line interface for backing up and restoring data using Restic.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Nick Jansen",
+      "email": "n.jansen@vanegmond.nl"
+    }
+  ],
+  "bin": [
+    "bcli"
+  ],
+  "require": {}
+}
