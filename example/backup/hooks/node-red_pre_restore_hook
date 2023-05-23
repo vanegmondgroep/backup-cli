@@ -1,3 +1,4 @@
 #!/bin/bash
 
+# Stop Node-RED container
 docker compose stop node-red

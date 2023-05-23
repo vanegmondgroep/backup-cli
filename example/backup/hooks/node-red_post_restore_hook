@@ -1,3 +1,4 @@
 #!/bin/bash
 
+# Start Node-RED container
 docker compose start node-red

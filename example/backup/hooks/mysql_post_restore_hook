@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Restore database dump
 docker compose exec mysql mysql -u root -psupersecret <$BACKUP_PATH/backup.sql
 
 rm $BACKUP_PATH/backup.sql
