@@ -2,23 +2,34 @@
 
 set -e
 
+trap 'catch $?' EXIT
+
+catch() {
+  if [[ $1 -gt 0 ]]; then
+    cat "$BACKUP_LOG"
+    log_error "Command failed (code: $1)"
+  fi
+}
+
 log() {
-  printf '[%s] %s\n' "$1" "${@:2}"
+  local dt
+  dt="$(date --rfc-3339=seconds)"
+  printf '[%s] %s %s\n' "$1" "$dt" "${@:2}"
 }
 
 log_info() {
   if [[ -n $2 ]]; then
-    log "$1" "${@:2}" >&2
+    log "${1^^}" "${@:2}" >&1
   else
-    log "⚡" "${@}" >&2
+    log "INFO" "${@}" >&1
   fi
 }
 
 log_error() {
   if [[ -n $2 ]]; then
-    log "$1" "${@:2}" >&2
+    log "${1^^}" "${@:2}" >&2
   else
-    log "x" "${@}" >&2
+    log "ERROR" "${@}" >&2
   fi
 
   exit 1
@@ -47,8 +58,7 @@ service_exists() {
   BACKUP_PATH=$(realpath "${!BACKUP_PATH_VAR}")
 
   export BACKUP_PATH=$BACKUP_PATH
-  export BACKUP_LOG="$BACKUP_LOGS_PATH/$1-backup.log"
-  export RESTORE_LOG="$BACKUP_LOGS_PATH/$1-restore.log"
+  export BACKUP_LOG="$BACKUP_LOGS_PATH/$1.log"
 
   if [[ -z $BACKUP_PATH ]]; then
     log_error "$1" "Environment [$BACKUP_PATH_VAR] is undefined"
@@ -145,7 +155,7 @@ case $1 in
 backup)
   service_exists "$2"
   log_info "$2" "Backup service data"
-  backup "${@:2}" >"$BACKUP_LOG"
+  backup "${@:2}" &>"$BACKUP_LOG"
   log_info "$2" "Backup completed!"
   ;;
 snapshots)
@@ -156,8 +166,13 @@ snapshots)
 restore)
   service_exists "$2"
   log_info "$2" "Restore service data"
-  restore "${@:2}" >"$RESTORE_LOG"
+  restore "${@:2}" &>"$BACKUP_LOG"
   log_info "$2" "Restore completed!"
+  ;;
+log)
+  service_exists "$2"
+  log_info "$2" "Display backup log"
+  cat "$BACKUP_LOG"
   ;;
 *)
   log_error "Command not found"
