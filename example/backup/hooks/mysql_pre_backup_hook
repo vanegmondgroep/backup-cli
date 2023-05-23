@@ -1,2 +1,4 @@
 #!/bin/bash
 
+# Create database dump
+docker compose exec mysql mysqldump -u root -psupersecret --all-databases --add-drop-table >$BACKUP_PATH/backup.sql

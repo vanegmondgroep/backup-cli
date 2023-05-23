@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Remove database dump
+rm $BACKUP_PATH/backup.sql
