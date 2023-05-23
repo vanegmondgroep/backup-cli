@@ -47,11 +47,11 @@ are available:
 
 | Variable                   | Default                 |
 |----------------------------|-------------------------|
+| `<service>_BACKUP_PATH`**  | -                       | 
 | `BACKUP_PASSWORD`          | `supersecret`           |
 | `BACKUP_LOGS_PATH`         | `./backup/logs`         | 
 | `BACKUP_HOOKS_PATH`        | `./backup/hooks`        |
 | `BACKUP_REPOSITORIES_PATH` | `./backup/repositories` |
-| `<service>_BACKUP_PATH`**  | -                       | 
 | `BACKUP_KEEP_LAST`         | 5                       | 
 | `BACKUP_KEEP_DAILY`        | 31                      | 
 | `BACKUP_KEEP_MONTHLY`      | 12                      | 
