@@ -8,21 +8,25 @@ Before installing Backup CLI, please make sure your environment meets the minimu
 
 * [Ubuntu 20.04 / 22.04](https://ubuntu.com/)
 * [Restic](https://restic.net)
+* [Composer](https://getcomposer.org/)
 
-Once you’ve verified the requirements, download and install Backup CLI using the following commands:
+Once you’ve verified the requirements, download and install Backup CLI with Composer.
 
 ```bash
-# Download Backup CLI
-curl -O https://raw.githubusercontent.com/vanegmondgroep/backup-cli/main/bcli 
-
-# Make the file executable
-chmod +x ./bcli 
-
-# Move it to somewhere in your PATH
-sudo mv ./bcli /usr/local/bin/bcli
+# Install Backup CLI package
+composer require vanegmondgroep/backup-cli
 ```
 
-Run the above commands again to update Backup CLI.
+By default, commands are invoked using the `vendor/bin/bcli` script. However, instead of repeatedly
+typing `vendor/bin/bcli` to execute commands, you may wish to configure a shell alias that allows you to execute
+commands more easily:
+
+```bash
+alias bcli='[ -f bcli ] && sh bcli || sh vendor/bin/bcli'
+```
+
+To make sure this is always available, you may add this to your shell configuration file in your home directory, such
+as `~/.zshrc` or `~/.bashrc`, and then restart your shell.
 
 ## Commands
 
