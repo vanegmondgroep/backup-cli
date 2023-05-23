@@ -7,7 +7,7 @@ log() {
 }
 
 log_info() {
-  if [[ ! -z $2 ]]; then
+  if [[ -n $2 ]]; then
     log "$1" "${@:2}" >&2
   else
     log "⚡" "${@}" >&2
@@ -15,7 +15,7 @@ log_info() {
 }
 
 log_error() {
-  if [[ ! -z $2 ]]; then
+  if [[ -n $2 ]]; then
     log "$1" "${@:2}" >&2
   else
     log "x" "${@}" >&2
@@ -33,8 +33,9 @@ load_env() {
   export $(grep -v '^#' .env | xargs -d '\n')
 
   BACKUP_PASSWORD=${BACKUP_PASSWORD:-supersecret}
-  BACKUP_HOOKS_PATH=${BACKUP_HOOKS_PATH:-./backup/hooks}
-  BACKUP_REPOSITORIES_PATH=${BACKUP_REPOSITORIES_PATH:-./backup/repositories}
+  BACKUP_HOOKS_PATH=$(realpath "${BACKUP_HOOKS_PATH:-./backup/hooks}")
+  BACKUP_REPOSITORIES_PATH=$(realpath "${BACKUP_REPOSITORIES_PATH:-./backup/repositories}")
+  BACKUP_LOGS_PATH=$(realpath "${BACKUP_LOGS_PATH:-./backup/logs}")
 }
 
 service_exists() {
@@ -43,7 +44,11 @@ service_exists() {
   fi
 
   BACKUP_PATH_VAR=${1^^}_BACKUP_PATH
-  export BACKUP_PATH=${!BACKUP_PATH_VAR}
+  BACKUP_PATH=$(realpath "${!BACKUP_PATH_VAR}")
+
+  export BACKUP_PATH=$BACKUP_PATH
+  export BACKUP_LOG="$BACKUP_LOGS_PATH/$1-backup.log"
+  export RESTORE_LOG="$BACKUP_LOGS_PATH/$1-restore.log"
 
   if [[ -z $BACKUP_PATH ]]; then
     log_error "$1" "Environment [$BACKUP_PATH_VAR] is undefined"
@@ -59,19 +64,25 @@ restic_cmd() {
 }
 
 restic_init() {
-  restic_cmd "$1" init --quiet &>/dev/null || true
+  restic_cmd "$1" init &>/dev/null || true
 }
 
 restic_backup() {
-  restic_cmd "$1" backup --quiet "$BACKUP_PATH"
+  cd "$BACKUP_PATH"
+  restic_cmd "$1" backup --tag "$1" .
 }
 
 restic_snapshots() {
   restic_cmd "$1" snapshots
 }
 
+restic_restore() {
+  cd "$BACKUP_PATH"
+  restic_cmd "$1" restore "$2" --target=.
+}
+
 restic_cleanup() {
-  restic_cmd "$1" forget --quiet --keep-last 5 --keep-daily 31 --keep-monthly 12 --keep-yearly 1
+  restic_cmd "$1" forget --keep-last 5 --keep-daily 31 --keep-monthly 12 --keep-yearly 1
 }
 
 backup() {
@@ -104,19 +115,49 @@ snapshots() {
   restic_snapshots "$1"
 }
 
+restore() {
+  pre_restore_hook="$BACKUP_HOOKS_PATH/$1_pre_restore_hook"
+  post_restore_hook="$BACKUP_HOOKS_PATH/$1_post_restore_hook"
+
+  if [[ -z "$2" ]]; then
+    log_error "$1" "No snapshot ID specified"
+  fi
+
+  if [[ -f "$pre_restore_hook" ]]; then
+    log_info "$1" "Run pre restore hook"
+    # shellcheck disable=SC1090
+    source "$pre_restore_hook"
+  fi
+
+  log_info "$1" "Restore files from repository"
+  restic_restore "$1" "$2"
+
+  if [[ -f "$post_restore_hook" ]]; then
+    log_info "$1" "Run post restore hook"
+    # shellcheck disable=SC1090
+    source "$post_restore_hook"
+  fi
+}
+
 load_env
 
 case $1 in
 backup)
   service_exists "$2"
-  log_info $2 "Backup service data"
-  backup "${@:2}"
-  log_info $2 "Backup completed!"
+  log_info "$2" "Backup service data"
+  backup "${@:2}" >"$BACKUP_LOG"
+  log_info "$2" "Backup completed!"
   ;;
 snapshots)
   service_exists "$2"
   log_info "$2" "Display service snapshots"
   snapshots "${@:2}"
+  ;;
+restore)
+  service_exists "$2"
+  log_info "$2" "Restore service data"
+  restore "${@:2}" >"$RESTORE_LOG"
+  log_info "$2" "Restore completed!"
   ;;
 *)
   log_error "Command not found"
