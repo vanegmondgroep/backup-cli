@@ -43,10 +43,18 @@ load_env() {
   # shellcheck disable=SC2046
   export $(grep -v '^#' .env | xargs -d '\n')
 
+  BACKUP_LOGS_PATH=${BACKUP_LOGS_PATH:-./backup/logs}
+  BACKUP_HOOKS_PATH=${BACKUP_HOOKS_PATH:-./backup/hooks}
+  BACKUP_REPOSITORIES_PATH=${BACKUP_REPOSITORIES_PATH:-./backup/repositories}
+
+  mkdir -p "$BACKUP_LOGS_PATH"
+  mkdir -p "$BACKUP_HOOKS_PATH"
+  mkdir -p "$BACKUP_REPOSITORIES_PATH"
+
   BACKUP_PASSWORD=${BACKUP_PASSWORD:-supersecret}
-  BACKUP_HOOKS_PATH=$(realpath "${BACKUP_HOOKS_PATH:-./backup/hooks}")
-  BACKUP_REPOSITORIES_PATH=$(realpath "${BACKUP_REPOSITORIES_PATH:-./backup/repositories}")
-  BACKUP_LOGS_PATH=$(realpath "${BACKUP_LOGS_PATH:-./backup/logs}")
+  BACKUP_LOGS_PATH=$(realpath "${BACKUP_LOGS_PATH}")
+  BACKUP_HOOKS_PATH=$(realpath "${BACKUP_HOOKS_PATH}")
+  BACKUP_REPOSITORIES_PATH=$(realpath "${BACKUP_REPOSITORIES_PATH}")
 }
 
 service_exists() {
